@@ -1,0 +1,24 @@
+---
+# defaults file for roles/glusterfs
+glusterfs_lvm_groups:
+- vg: monitoring
+  pvs:
+  - /dev/disk/by-path/pci-0000:13:00.0-scsi-0:0:0:0
+- vg: minio
+  pvs:
+  - /dev/disk/by-path/pci-0000:1b:00.0-scsi-0:0:0:0
+- vg: accesscontrollerredis
+  pvs:
+  - /dev/disk/by-path/pci-0000:04:00.0-scsi-0:0:0:0
+- vg: adaptorredis
+  pvs:
+  - /dev/disk/by-path/pci-0000:04:00.0-scsi-0:0:1:0
+- vg: approverredis
+  pvs:
+  - /dev/disk/by-path/pci-0000:04:00.0-scsi-0:0:2:0
+- vg: taskschedulerredis
+  pvs:
+  - /dev/disk/by-path/pci-0000:04:00.0-scsi-0:0:3:0
+
+glusterfs_volumes_dir: /data/glusterfs
+

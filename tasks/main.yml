@@ -1,0 +1,88 @@
+---
+# tasks file for roles/glusterfs
+- name: create physical volumes and volume groups
+  lvg:
+    vg: glusterfs-{{ item.vg }}
+    pvs: "{{ item.pvs }}"
+  with_items: "{{ glusterfs_lvm_groups }}"
+
+- name: create logical volumes for glusterfs
+  lvol:
+    vg: glusterfs-{{ item.vg }}
+    lv: glusterfs-{{ item.vg }}
+    size: 100%FREE
+  with_items: "{{ glusterfs_lvm_groups }}"
+
+- name: format glusterfs logical volumes with xfs filesystem
+  filesystem:
+    dev: /dev/mapper/glusterfs--{{ item.vg }}-glusterfs--{{ item.vg }}
+    fstype: xfs
+    opts: -i size=512
+  with_items: "{{ glusterfs_lvm_groups }}"
+
+- name: create directories for glusterfs volumes and bricks
+  file:
+    path: "{{ glusterfs_volumes_dir }}/{{ item.vg }}/brick-01"
+    state: directory
+  with_items: "{{ glusterfs_lvm_groups }}"
+
+- name: mount glusterfs logical volumes
+  mount:
+    path: "{{ glusterfs_volumes_dir }}/{{ item.vg }}/brick-01"
+    src: /dev/mapper/glusterfs--{{ item.vg }}-glusterfs--{{ item.vg }}
+    fstype: xfs
+    opts: rw,inode64,noatime,nouuid
+    dump: '1'
+    passno: '2'
+    state: mounted
+  with_items: "{{ glusterfs_lvm_groups }}"
+
+- name: disable swap
+  shell: /usr/sbin/swapoff -a
+
+- name: remove swapfile from /etc/fstab
+  mount:
+    path: swap
+    fstype: swap
+    state: absent
+
+- name: tuning kernel for glusterfs (vm.swappiness)
+  sysctl:
+    name: vm.swappiness
+    value: 0
+    state: present
+    ignoreerrors: yes
+    sysctl_set: yes
+
+- name: install centos-release-gluster6 repo
+  yum:
+    name: centos-release-gluster6
+    state: present
+
+- name: install glusterfs
+  yum:
+    name:
+    - glusterfs
+    - glusterfs-cli
+    - glusterfs-libs
+    - glusterfs-server
+    state: present
+
+- name: start glusterd
+  systemd:
+    name: glusterd
+    enabled: yes
+    state: started
+
+- name: open firewall ports for glusterfs
+  firewalld:
+    immediate: yes
+    offline: yes
+    permanent: yes
+    port: "{{ item }}/tcp"
+    state: enabled
+  with_items:
+  - 8080
+  - 9100
+  - 24007-24008
+  - 49152-49157
