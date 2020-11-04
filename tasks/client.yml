@@ -1,0 +1,17 @@
+---
+- name: add glusterfs repo
+  yum:
+    name: centos-release-gluster{{ glusterfs_version }}
+    state: present
+
+- name: add fuse kernel module
+  modprobe:
+    name: fuse
+    state: present
+
+- name: install glusterfs client tools
+  yum:
+    name:
+    - glusterfs
+    - glusterfs-fuse
+    state: present

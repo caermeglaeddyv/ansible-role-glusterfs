@@ -1,24 +1,55 @@
 ---
-# defaults file for roles/glusterfs
-glusterfs_lvm_groups:
-- vg: monitoring
-  pvs:
-  - /dev/disk/by-path/pci-0000:13:00.0-scsi-0:0:0:0
-- vg: minio
-  pvs:
-  - /dev/disk/by-path/pci-0000:1b:00.0-scsi-0:0:0:0
-- vg: accesscontrollerredis
-  pvs:
-  - /dev/disk/by-path/pci-0000:04:00.0-scsi-0:0:0:0
-- vg: adaptorredis
-  pvs:
-  - /dev/disk/by-path/pci-0000:04:00.0-scsi-0:0:1:0
-- vg: approverredis
-  pvs:
-  - /dev/disk/by-path/pci-0000:04:00.0-scsi-0:0:2:0
-- vg: taskschedulerredis
-  pvs:
-  - /dev/disk/by-path/pci-0000:04:00.0-scsi-0:0:3:0
+# defaults file for glusterfs
 
-glusterfs_volumes_dir: /data/glusterfs
 
+# LVM options to create and mount:
+glusterfs_lvm: []
+# - lv: ""
+#   vg: ""
+#   pvs:
+#   - ""
+#   fstype: ""
+#   fsopts: ""
+#   mount_opts: ""
+#   mount_dump: ""
+#   mount_passno: ""
+
+# Root directory, where all glusterfs volumes will be mounted:
+glusterfs_dir: /data/glusterfs
+
+# Filesystem type to format every logical volume with,
+# used if "glusterfs_lvm.fstype" is missing for single logical volume:
+glusterfs_fstype: xfs
+
+# Filesystem options for every logical volume, used if
+# "glusterfs_lvm.fsopts" is missing for single logical volume:
+glusterfs_fsopts: -i size=512
+
+# Mount options for every logical volume, used if
+# "glusterfs_lvm.mount_opts" is missing for single logical volume:
+glusterfs_mount_opts: rw,inode64,noatime,nouuid
+
+# /etc/fstab mount "dump" parameter to use for every logical volume,
+# used if "glusterfs_lvm.mount_dump" is missing for single logical volume:
+glusterfs_mount_dump: '1'
+
+# /etc/fstab mount "passno" parameter to use for every logical volume,
+# used if "glusterfs_lvm.mount_passno" is missing for single logical volume:
+glusterfs_mount_passno: '2'
+
+# Version of glusterfs repo package:
+glusterfs_version: 6
+
+# Open firewall ports for bricks, this port range determines
+# the number of bricks will be accessible throught firewall:
+glusterfs_brick_ports: 49152-49155
+
+# Glusterfs volumes to create:
+gluster_volumes:
+# - name: ""
+#   brick_dirs:
+#   - ""
+#   peeclusterrs:
+#   - ""
+#   auth_allow:
+#   - ""
