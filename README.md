@@ -9,7 +9,7 @@ For now, it does the following:
 - creates directories for glusterfs volumes and mounts LVM logical volumes
 - installs glusterfs repo and packages
 - creates cluster and joins peers to it
-- creates and configures glusterfs volumes
+- creates and configures glusterfs volumes (currently supported volume types are distributed and replicated ones)
 - installs client tools only if need via include of separate tasks file
 
 
@@ -78,7 +78,8 @@ gluster_volumes:
 # - name: ""
 #   brick_dirs:
 #   - ""
-#   peeclusterrs:
+#   replicas:
+#   clusters:
 #   - ""
 #   auth_allow:
 #   - ""

@@ -32,8 +32,8 @@
 - name: format glusterfs logical volumes
   filesystem:
     dev: /dev/mapper/glusterfs--{{ item.vg }}-glusterfs--{{ item.lv }}
-    fstype: "{% if item.fstype | length %}{{ item.fstype }}{% else %}{{ glusterfs_fstype }}{% endif %}"
-    opts: "{% if item.opts | length %}{{ item.opts }}{% else %}{{ glusterfs_opts }}{% endif %}"
+    fstype: "{% if item.fstype is defined %}{{ item.fstype }}{% else %}{{ glusterfs_fstype }}{% endif %}"
+    opts: "{% if item.opts is defined %}{{ item.opts }}{% else %}{{ glusterfs_fsopts }}{% endif %}"
   with_items: "{{ glusterfs_lvm }}"
   tags:
   - never
@@ -48,10 +48,10 @@
   mount:
     path: "{{ glusterfs_dir }}/{{ item.lv }}/brick-01"
     src: /dev/mapper/glusterfs--{{ item.vg }}-glusterfs--{{ item.lv }}
-    fstype: "{% if item.fstype | length %}{{ item.fstype }}{% else %}{{ glusterfs_fstype }}{% endif %}"
-    opts: "{% if item.mount_opts | length %}{{ item.mount_opts }}{% else %}{{ glusterfs_mount_opts }}{% endif %}"
-    dump: "{% if item.mount_dump | length %}{{ item.mount_dump }}{% else %}{{ glusterfs_mount_dump }}{% endif %}"
-    passno: "{% if item.mount_passno | length %}{{ item.mount_passno }}{% else %}{{ glusterfs_mount_passno }}{% endif %}"
+    fstype: "{% if item.fstype is defined %}{{ item.fstype }}{% else %}{{ glusterfs_fstype }}{% endif %}"
+    opts: "{% if item.mount_opts is defined %}{{ item.mount_opts }}{% else %}{{ glusterfs_mount_opts }}{% endif %}"
+    dump: "{% if item.mount_dump is defined %}{{ item.mount_dump }}{% else %}{{ glusterfs_mount_dump }}{% endif %}"
+    passno: "{% if item.mount_passno is defined %}{{ item.mount_passno }}{% else %}{{ glusterfs_mount_passno }}{% endif %}"
     state: mounted
   with_items: "{{ glusterfs_lvm }}"
   tags:
@@ -110,7 +110,8 @@
   command: /usr/sbin/gluster peer probe {{ item }}
   delegate_to: "{{ ansible_play_batch | first }}"
   run_once: true
-  with_items: "{{ ansible_play_batch | !first }}"
+  with_items: "{{ ansible_play_batch }}"
+  when: item != ansible_play_batch[0]
   tags:
   - never
 
@@ -125,11 +126,13 @@
   gluster_volume:
     name: "{{ item.name }}"
     bricks: "{% for dir in item.brick_dirs %}{{ glusterfs_dir }}/{{ dir }}/brick-01/brick{{ ',' if not loop.last }}{% endfor %}"
-    replicas: "{{ item.replicas }}"
+    replicas: "{{ item.replicas | default(omit) }}"
     cluster: "{{ item.cluster }}"
     options:
       auth.allow: "{% for host in item.auth_allow %}{{ host }}{{ ',' if not loop.last }}{% endfor %}"
     state: present
+  delegate_to: "{{ ansible_play_batch[1] }}"
+  run_once: true
   with_items: "{{ glusterfs_volumes }}"
   tags:
   - never
