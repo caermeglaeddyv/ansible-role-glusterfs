@@ -132,7 +132,7 @@ It's highly recommended to start you test deploys from there, especially if you 
 License
 -------
 
-[Apache 2.0](https://github.com/caermeglaeddyv/ansible-role-rear/blob/dev/LICENSE)
+[Apache 2.0](https://github.com/caermeglaeddyv/ansible-role-glusterfs/blob/dev/LICENSE)
 
 
 Author Information
